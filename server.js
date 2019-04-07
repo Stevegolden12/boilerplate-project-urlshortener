@@ -91,8 +91,7 @@ app.get('/', function (req, res) {
 app.get("/number/:sNumber", function (req, res) {
   console.log("shorturl is " + req.params.sNumber)
   URL.find({ shortUrl: req.params.sNumber }, 'originalUrl shortUrl', function (err, docs) {
-    console.log(docs[0])
-    if (docs[0]) {
+     if (docs[0]) {
       res.redirect(docs[0].originalUrl)
     }
   })
@@ -113,17 +112,13 @@ app.post("/api/shorturl/new", function (req, res, next) {
   console.log(Url.split(/\/{1}/))
   //Taking the whole url spliting between /
   var orgUrl = Url.split(/\/{1}/);
-  var shortUrlId = shortUrl();
+  
 
   dns.lookup(orgUrl[2], (err, address, family) => {
     console.log(address)
     if (err || address === '92.242.140.2') {
-      console.log("Error log")
       res.json({ "error": "invalid URL" })
-    } else {
-      //Add the URL and shortURL in the database
-   
- 
+    } else { 
 
       //Search database and find if url is already in system and if so return the results
   
@@ -131,15 +126,32 @@ app.post("/api/shorturl/new", function (req, res, next) {
          if (docs[0]) {
            res.send('The ' + docs[0].originalUrl + ' is in the database and can be access by using [this_project_url]/number/' + docs[0].shortUrl)
          } else {
-           console.log("url: " + req.body.url)
-           const newSUrl = shortUrl();
-           console.log("short url: " + shortUrl())
+           var newSUrl = 20000;
+           let toggleChk = false;
+
+   
+          let newSURL1 = URL.findOne({ shortUrl: newSUrl }, 'shortUrl', function (err, sdoc) {
+                console.log("sdoc: " + sdoc)
+               if (sdoc) {
+                 console.log("Shortener Validation worked")
+                  return Math.floor(Math.random() * 20000);
+                 
+               } else {
+                 console.log("No shortened validation error")
+                 return 99;
+                 toggleChk = true;
+                }
+           })
+
+           console.log("newSUrl1: " + newSUrl1[0])
+
+           console.log("newSUrl after validation: " + newSUrl)
+
 
            var Url1 = new URL({ shortUrl: newSUrl, originalUrl: req.body.url })
 
            Url1.save(Url1, function (err) {
              if (err) { return console.error(err) }
-             console.log(Url1.shortUrl)
            })
 
            res.send('The ' + req.body.url + ' can be access by using [this_project_url]/number/' + newSUrl)
